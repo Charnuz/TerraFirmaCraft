@@ -83,7 +83,7 @@ public abstract class SnowLayerBlockMixin extends Block
             if (state.getValue(SnowLayerBlock.LAYERS) == 1)
             {
                 BlockState stateDown = level.getBlockState(pos.below());
-                if (stateDown.getBlock() instanceof ILeavesBlock)
+                if (stateDown.getBlock() instanceof ILeavesBlock || Helpers.isBlock(stateDown, TFCBlocks.THATCH.get()))
                 {
                     cir.setReturnValue(true);
                 }
