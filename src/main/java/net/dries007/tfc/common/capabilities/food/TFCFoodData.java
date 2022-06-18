@@ -279,11 +279,11 @@ public class TFCFoodData extends FoodData
 
     public void eat(FoodRecord data)
     {
-        addThirst(data.getWater());
+        addThirst(data.water());
         nutritionData.addNutrients(data);
 
         // In order to get the exact saturation we want, apply this scaling factor here
-        delegate.eat(data.getHunger(), data.getSaturation() / (2f * data.getHunger()));
+        delegate.eat(data.hunger(), data.saturation() / (2f * data.hunger()));
     }
 
     public CompoundTag serializeToPlayerData()

@@ -58,10 +58,10 @@ public class FoodDefinition extends ItemDefinition
     {
         ingredient.toNetwork(buffer);
 
-        buffer.writeVarInt(data.getHunger());
-        buffer.writeFloat(data.getSaturation());
-        buffer.writeFloat(data.getWater());
-        buffer.writeFloat(data.getDecayModifier());
+        buffer.writeVarInt(data.hunger());
+        buffer.writeFloat(data.saturation());
+        buffer.writeFloat(data.water());
+        buffer.writeFloat(data.decayModifier());
 
         for (Nutrient nutrient : Nutrient.VALUES)
         {

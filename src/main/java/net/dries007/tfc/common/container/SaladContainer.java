@@ -154,13 +154,13 @@ public class SaladContainer extends Container implements ISlotCallback
                             break;
                         }
 
-                        water += food.getData().getWater();
-                        saturation += food.getData().getSaturation();
+                        water += food.getData().water();
+                        saturation += food.getData().saturation();
 
-                        final float[] ingredientNutrition = food.getData().getNutrients();
+                        final FoodRecord ingredientNutrition = food.getData();
                         for (Nutrient nutrient : Nutrient.values())
                         {
-                            nutrition[nutrient.ordinal()] += ingredientNutrition[nutrient.ordinal()];
+                            nutrition[nutrient.ordinal()] += ingredientNutrition.getNutrient(nutrient);
                         }
 
                         ingredientCount++;
@@ -223,7 +223,8 @@ public class SaladContainer extends Container implements ISlotCallback
     {
         return switch (typeOf(slotIndex))
             {
-                case CONTAINER -> {
+                case CONTAINER ->
+                {
                     if (slotIndex != SLOT_OUTPUT) // todo: this needs to handle updating the salad but it's complicated I'll do it later to hell with it.
                     {
                         yield !moveItemStackTo(stack, containerSlots, containerSlots + 36, false);

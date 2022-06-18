@@ -9,6 +9,7 @@ package net.dries007.tfc.common.capabilities.food;
 import java.util.Locale;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.StringRepresentable;
 
 public enum Nutrient implements StringRepresentable
@@ -45,5 +46,25 @@ public enum Nutrient implements StringRepresentable
     public ChatFormatting getColor()
     {
         return color;
+    }
+
+    public static float[] readNbt(CompoundTag nbt)
+    {
+        float[] nutrients = new float[Nutrient.TOTAL];
+        nutrients[Nutrient.GRAIN.ordinal()] = nbt.getFloat("grain");
+        nutrients[Nutrient.VEGETABLES.ordinal()] = nbt.getFloat("veg");
+        nutrients[Nutrient.FRUIT.ordinal()] = nbt.getFloat("fruit");
+        nutrients[Nutrient.PROTEIN.ordinal()] = nbt.getFloat("meat");
+        nutrients[Nutrient.DAIRY.ordinal()] = nbt.getFloat("dairy");
+        return nutrients;
+    }
+
+    public static void writeNbt(CompoundTag nbt, float[] nutrients)
+    {
+        nbt.putFloat("grain", nutrients[Nutrient.GRAIN.ordinal()]);
+        nbt.putFloat("veg", nutrients[Nutrient.VEGETABLES.ordinal()]);
+        nbt.putFloat("fruit", nutrients[Nutrient.FRUIT.ordinal()]);
+        nbt.putFloat("meat", nutrients[Nutrient.PROTEIN.ordinal()]);
+        nbt.putFloat("dairy", nutrients[Nutrient.DAIRY.ordinal()]);
     }
 }

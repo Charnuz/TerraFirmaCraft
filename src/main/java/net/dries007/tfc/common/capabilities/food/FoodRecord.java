@@ -6,52 +6,25 @@
 
 package net.dries007.tfc.common.capabilities.food;
 
-import javax.annotation.concurrent.Immutable;
-
 import net.minecraft.nbt.CompoundTag;
 
-@Immutable
-public class FoodRecord
+public record FoodRecord(int hunger, float saturation, float water, float[] nutrients, float decayModifier)
 {
     public static final FoodRecord EMPTY = new FoodRecord(0, 0, 0, new float[Nutrient.TOTAL], 0);
 
-    private final float[] nutrients; // Nutritional values
-    private final int hunger; // Hunger. In TFC (for now) this is almost always 4
-    private final float saturation; // Saturation, only provided by some basic foods and meal bonuses
-    private final float water; // Water, provided by some foods
-    private final float decayModifier; // Decay modifier - higher = shorter decay
-
-    public FoodRecord(int hunger, float water, float saturation, float grain, float fruit, float veg, float protein, float dairy, float decayModifier)
-    {
-        this(hunger, water, saturation, new float[] {grain, fruit, veg, protein, dairy}, decayModifier);
-    }
-
-    public FoodRecord(int hunger, float water, float saturation, float[] nutrients, float decayModifier)
-    {
-        this.hunger = hunger;
-        this.water = water;
-        this.saturation = saturation;
-        this.nutrients = nutrients.clone();
-        this.decayModifier = decayModifier;
-    }
-
     public FoodRecord(CompoundTag nbt)
     {
-        hunger = nbt.getInt("food");
-        saturation = nbt.getFloat("sat");
-        water = nbt.getFloat("water");
-        decayModifier = nbt.getFloat("decay");
-        nutrients = new float[Nutrient.TOTAL];
-        nutrients[Nutrient.GRAIN.ordinal()] = nbt.getFloat("grain");
-        nutrients[Nutrient.VEGETABLES.ordinal()] = nbt.getFloat("veg");
-        nutrients[Nutrient.FRUIT.ordinal()] = nbt.getFloat("fruit");
-        nutrients[Nutrient.PROTEIN.ordinal()] = nbt.getFloat("meat");
-        nutrients[Nutrient.DAIRY.ordinal()] = nbt.getFloat("dairy");
+        this(nbt.getInt("food"), nbt.getFloat("sat"), nbt.getFloat("water"), Nutrient.readNbt(nbt), nbt.getFloat("decay"));
     }
 
     public float getNutrient(Nutrient nutrient)
     {
         return nutrients[nutrient.ordinal()];
+    }
+
+    public float getNutrient(int i)
+    {
+        return nutrients[i];
     }
 
     public CompoundTag write()
@@ -61,41 +34,7 @@ public class FoodRecord
         nbt.putFloat("sat", saturation);
         nbt.putFloat("water", water);
         nbt.putFloat("decay", decayModifier);
-        nbt.putFloat("grain", nutrients[Nutrient.GRAIN.ordinal()]);
-        nbt.putFloat("veg", nutrients[Nutrient.VEGETABLES.ordinal()]);
-        nbt.putFloat("fruit", nutrients[Nutrient.FRUIT.ordinal()]);
-        nbt.putFloat("meat", nutrients[Nutrient.PROTEIN.ordinal()]);
-        nbt.putFloat("dairy", nutrients[Nutrient.DAIRY.ordinal()]);
+        Nutrient.writeNbt(nbt, nutrients);
         return nbt;
-    }
-
-    public int getHunger()
-    {
-        return hunger;
-    }
-
-    public float getSaturation()
-    {
-        return saturation;
-    }
-
-    public float getWater()
-    {
-        return water;
-    }
-
-    public float getDecayModifier()
-    {
-        return decayModifier;
-    }
-
-    float getNutrient(int i)
-    {
-        return nutrients[i];
-    }
-
-    public float[] getNutrients()
-    {
-        return nutrients;
     }
 }

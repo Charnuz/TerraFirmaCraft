@@ -64,8 +64,8 @@ public class SoupPotRecipe extends PotRecipe
                     break;
                 }
                 final FoodRecord data = food.getData();
-                water += data.getWater();
-                saturation += data.getSaturation();
+                water += data.water();
+                saturation += data.saturation();
                 for (Nutrient nutrient : Nutrient.VALUES)
                 {
                     nutrition[nutrient.ordinal()] += data.getNutrient(nutrient);
@@ -76,7 +76,8 @@ public class SoupPotRecipe extends PotRecipe
         if (ingredientCount > 0)
         {
             float multiplier = 1 - (0.05f * ingredientCount); // per-serving multiplier of nutrition
-            water *= multiplier; saturation *= multiplier;
+            water *= multiplier;
+            saturation *= multiplier;
             Nutrient maxNutrient = Nutrient.GRAIN; // determines what item you get. this is a default
             float maxNutrientValue = 0;
             for (Nutrient nutrient : Nutrient.VALUES)

@@ -74,20 +74,20 @@ public enum SandwichModifier implements ItemStackModifier.SingleInstance<Sandwic
 
         // Nutrition and saturation of sandwich is (average of breads) + 0.8f (sum of ingredients), +1 bonus saturation
         float[] nutrition = new float[Nutrient.TOTAL];
-        float saturation = 1 + 0.5f * (bread1.getSaturation() + bread2.getSaturation());
-        float water = 0.5f * (bread1.getWater() + bread2.getWater());
+        float saturation = 1 + 0.5f * (bread1.saturation() + bread2.saturation());
+        float water = 0.5f * (bread1.water() + bread2.water());
         for (int i = 0; i < nutrition.length; i++)
         {
-            nutrition[i] = 0.5f * (bread1.getNutrients()[i] + bread2.getNutrients()[i]);
+            nutrition[i] = 0.5f * (bread1.getNutrient(i) + bread2.getNutrient(i));
         }
         for (FoodRecord ingredient : ingredients)
         {
             for (int i = 0; i < nutrition.length; i++)
             {
-                nutrition[i] += 0.8f * ingredient.getNutrients()[i];
+                nutrition[i] += 0.8f * ingredient.getNutrient(i);
             }
-            saturation += 0.8f * ingredient.getSaturation();
-            water += 0.8f * ingredient.getWater();
+            saturation += 0.8f * ingredient.saturation();
+            water += 0.8f * ingredient.water();
         }
 
         handler.setFood(new FoodRecord(4, water, saturation, nutrition, 1f / handler.getDecayDateModifier()));

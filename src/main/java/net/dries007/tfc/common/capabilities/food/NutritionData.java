@@ -117,11 +117,11 @@ public class NutritionData implements INBTSerializable<CompoundTag>
         for (int i = 0; i < records.size(); i++)
         {
             FoodRecord record = records.get(i);
-            int nextHunger = record.getHunger() + runningHungerTotal;
+            int nextHunger = record.hunger() + runningHungerTotal;
             if (nextHunger < this.hungerWindow)
             {
                 // Add weighted nutrition, keep moving
-                updateAllNutrients(nutrients, j -> nutrients[j] + record.getNutrient(j) * record.getHunger());
+                updateAllNutrients(nutrients, j -> nutrients[j] + record.getNutrient(j) * record.hunger());
                 runningHungerTotal = nextHunger;
             }
             else

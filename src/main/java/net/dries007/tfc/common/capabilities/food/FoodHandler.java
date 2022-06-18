@@ -117,7 +117,7 @@ public class FoodHandler implements ICapabilitySerializable<CompoundTag>, IFood
     public float getDecayDateModifier()
     {
         // Decay modifiers are higher = shorter
-        float mod = data.getDecayModifier() * TFCConfig.SERVER.foodDecayModifier.get().floatValue();
+        float mod = data.decayModifier() * TFCConfig.SERVER.foodDecayModifier.get().floatValue();
         for (FoodTrait trait : foodTraits)
         {
             mod *= trait.getDecayModifier();
