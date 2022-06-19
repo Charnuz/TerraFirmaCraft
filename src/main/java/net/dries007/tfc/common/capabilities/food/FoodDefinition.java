@@ -26,6 +26,7 @@ public class FoodDefinition extends ItemDefinition
         final float saturation = GsonHelper.getAsFloat(json, "saturation", 0);
         final float water = GsonHelper.getAsFloat(json, "water", 0);
         final float decayModifier = GsonHelper.getAsFloat(json, "decay_modifier", 1);
+        final boolean alwaysRotten = GsonHelper.getAsBoolean(json, "always_rotten", false);
 
         final float[] nutrition = new float[Nutrient.TOTAL];
         for (Nutrient nutrient : Nutrient.VALUES)
@@ -33,7 +34,7 @@ public class FoodDefinition extends ItemDefinition
             nutrition[nutrient.ordinal()] = GsonHelper.getAsFloat(json, nutrient.getSerializedName(), 0);
         }
 
-        this.data = new FoodRecord(hunger, water, saturation, nutrition, decayModifier);
+        this.data = new FoodRecord(hunger, water, saturation, nutrition, decayModifier, alwaysRotten);
     }
 
     public FoodDefinition(ResourceLocation id, FriendlyByteBuf buffer)
@@ -44,6 +45,7 @@ public class FoodDefinition extends ItemDefinition
         final float saturation = buffer.readFloat();
         final float water = buffer.readFloat();
         final float decayModifier = buffer.readFloat();
+        final boolean alwaysRotten = buffer.readBoolean();
 
         final float[] nutrition = new float[Nutrient.TOTAL];
         for (Nutrient nutrient : Nutrient.VALUES)
@@ -51,7 +53,7 @@ public class FoodDefinition extends ItemDefinition
             nutrition[nutrient.ordinal()] = buffer.readFloat();
         }
 
-        this.data = new FoodRecord(hunger, water, saturation, nutrition, decayModifier);
+        this.data = new FoodRecord(hunger, water, saturation, nutrition, decayModifier, alwaysRotten);
     }
 
     public void encode(FriendlyByteBuf buffer)
@@ -62,6 +64,7 @@ public class FoodDefinition extends ItemDefinition
         buffer.writeFloat(data.saturation());
         buffer.writeFloat(data.water());
         buffer.writeFloat(data.decayModifier());
+        buffer.writeBoolean(data.alwaysRotten());
 
         for (Nutrient nutrient : Nutrient.VALUES)
         {

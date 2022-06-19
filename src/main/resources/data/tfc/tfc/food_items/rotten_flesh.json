@@ -1,0 +1,12 @@
+{
+  "__comment__": "This file was automatically created by mcresources",
+  "ingredient": {
+    "item": "minecraft:rotten_flesh"
+  },
+  "category": "other",
+  "hunger": 4,
+  "saturation": 0,
+  "decay": 1,
+  "protein": 1,
+  "always_rotten": true
+}

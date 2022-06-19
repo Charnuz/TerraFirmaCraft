@@ -70,6 +70,10 @@ public class FoodHandler implements ICapabilitySerializable<CompoundTag>, IFood
         {
             return UNKNOWN_CREATION_DATE;
         }
+        if (getData().alwaysRotten())
+        {
+            return ROTTEN_DATE;
+        }
         if (creationDate == UNKNOWN_CREATION_DATE)
         {
             this.creationDate = FoodCapability.getRoundedCreationDate();

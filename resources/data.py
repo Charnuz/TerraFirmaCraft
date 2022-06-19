@@ -713,6 +713,7 @@ def generate(rm: ResourceManager):
     food_item(rm, 'cooked_chevon', 'tfc:food/cooked_chevon', Category.cooked_meat, 4, 1, 0, 2.25, protein=2)
     food_item(rm, 'cooked_gran_feline', 'tfc:food/cooked_gran_feline', Category.cooked_meat, 4, 2, 0, 2.25, protein=2.5)
     food_item(rm, 'cooked_camelidae', 'tfc:food/cooked_camelidae', Category.cooked_meat, 4, 2, 0, 2.25, protein=2.5)
+    food_item(rm, 'rotten_flesh', 'minecraft:rotten_flesh', Category.other, 4, 0, 0, 1, protein=1, rotten=True)
 
     # Drinkables
 
@@ -896,7 +897,7 @@ def fauna(chance: int = None, distance_below_sea_level: int = None, climate: Dic
     }
 
 
-def food_item(rm: ResourceManager, name_parts: utils.ResourceIdentifier, ingredient: utils.Json, category: Category, hunger: int, saturation: float, water: int, decay: float, fruit: Optional[float] = None, veg: Optional[float] = None, protein: Optional[float] = None, grain: Optional[float] = None, dairy: Optional[float] = None):
+def food_item(rm: ResourceManager, name_parts: utils.ResourceIdentifier, ingredient: utils.Json, category: Category, hunger: int, saturation: float, water: int, decay: float, fruit: Optional[float] = None, veg: Optional[float] = None, protein: Optional[float] = None, grain: Optional[float] = None, dairy: Optional[float] = None, rotten: Optional[bool] = None):
     rm.item_tag('tfc:foods', ingredient)
     rm.data(('tfc', 'food_items', name_parts), {
         'ingredient': utils.ingredient(ingredient),
@@ -909,7 +910,8 @@ def food_item(rm: ResourceManager, name_parts: utils.ResourceIdentifier, ingredi
         'vegetables': veg,
         'protein': protein,
         'grain': grain,
-        'dairy': dairy
+        'dairy': dairy,
+        'always_rotten': rotten
     })
     rm.item_tag('foods', ingredient)
     if category in (Category.fruit, Category.vegetable):
