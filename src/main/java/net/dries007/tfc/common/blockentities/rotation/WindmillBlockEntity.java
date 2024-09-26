@@ -23,18 +23,17 @@ import net.dries007.tfc.common.blockentities.TickableInventoryBlockEntity;
 import net.dries007.tfc.common.blocks.rotation.AxleBlock;
 import net.dries007.tfc.common.blocks.rotation.WindmillBlock;
 import net.dries007.tfc.util.Helpers;
-import net.dries007.tfc.util.climate.Climate;
-import net.dries007.tfc.util.rotation.NetworkAction;
-import net.dries007.tfc.util.rotation.Node;
-import net.dries007.tfc.util.rotation.Rotation;
-import net.dries007.tfc.util.rotation.SourceNode;
+import net.dries007.tfc.util.network.Action;
+import net.dries007.tfc.util.network.RotationNetworkManager;
+import net.dries007.tfc.util.network.RotationNode;
+import net.dries007.tfc.util.network.RotationOwner;
 
-public class WindmillBlockEntity extends TickableInventoryBlockEntity<ItemStackHandler> implements RotatingBlockEntity
+
+public class WindmillBlockEntity extends TickableInventoryBlockEntity<ItemStackHandler> implements RotationOwner
 {
     public static final int SLOTS = 5;
     public static final float MIN_SPEED = Mth.TWO_PI / (20 * 20);
-    public static final float MAX_SPEED = Mth.TWO_PI / (8 * 20) - MIN_SPEED;
-    private static final float LERP_SPEED = MIN_SPEED / (5 * 20);
+    public static final float MAX_SPEED = Mth.TWO_PI / (8 * 20);
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, WindmillBlockEntity windmill)
     {
@@ -44,9 +43,7 @@ public class WindmillBlockEntity extends TickableInventoryBlockEntity<ItemStackH
             windmill.updateState();
         }
 
-        clientTick(level, pos, state, windmill);
-
-        if (level.getGameTime() % 40 == 0)
+        if (level.getGameTime() % 40 == 0 && isObstructedBySolidBlocks(level, pos, state.getValue(WindmillBlock.AXIS)))
         {
             boolean obstructedNow = isObstructedBySolidBlocks(level, pos, state.getValue(WindmillBlock.AXIS));
             if (obstructedNow != windmill.obstructed)
@@ -56,38 +53,6 @@ public class WindmillBlockEntity extends TickableInventoryBlockEntity<ItemStackH
             }
 
         }
-    }
-
-    public static void clientTick(Level level, BlockPos pos, BlockState state, WindmillBlockEntity windmill)
-    {
-        final Rotation.Tickable rotation = windmill.node.rotation();
-
-        if (windmill.obstructed)
-        {
-            rotation.setSpeed(0);
-        }
-        else
-        {
-            rotation.tick();
-
-            final float targetBeforeWind = Mth.map(state.getValue(WindmillBlock.COUNT), 1, SLOTS, 0, MAX_SPEED) + (state.getValue(WindmillBlock.COUNT) > 1 ? MIN_SPEED : 0);
-
-            float wind = Climate.get(level).getWind(level, pos).length();
-
-            float windFactor = Math.min(wind, 0.5f) * 4f; // clamp below ~57 kmh and do a little mixing math
-
-            final float targetSpeed = windFactor * targetBeforeWind;
-            final float currentSpeed = rotation.speed();
-            final float nextSpeed = targetSpeed > currentSpeed
-                ? Math.min(targetSpeed, currentSpeed + LERP_SPEED)
-                : Math.max(targetSpeed, currentSpeed - LERP_SPEED);
-            rotation.setSpeed(nextSpeed);
-        }
-    }
-
-    public boolean isObstructed()
-    {
-        return this.obstructed;
     }
 
     public static boolean isObstructedBySolidBlocks(Level level, BlockPos pos, Direction.Axis axis)
@@ -114,8 +79,7 @@ public class WindmillBlockEntity extends TickableInventoryBlockEntity<ItemStackH
         return false;
     }
 
-    private final SourceNode node;
-    private boolean invalid;
+    private final RotationNode node;
     private boolean needsStateUpdate = true;
 
     private boolean obstructed = false;
@@ -135,13 +99,24 @@ public class WindmillBlockEntity extends TickableInventoryBlockEntity<ItemStackH
         // - Rotation is always in the 'forward' direction (so windmills look somewhat consistent).
         final Direction.Axis axis = state.getValue(WindmillBlock.AXIS);
 
-        this.invalid = false;
-        this.node = new SourceNode(pos, Node.ofAxis(axis), Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE), 0f)
+        this.node = new RotationNode.Axle(this, axis, RotationNetworkManager.WINDMILL_TORQUE)
         {
+            @Override
+            protected float providedSpeed()
+            {
+                return Mth.map(getBlockState().getValue(WindmillBlock.COUNT), 1, SLOTS, MIN_SPEED, MAX_SPEED);
+            }
+
             @Override
             public String toString()
             {
                 return "Windmill[pos=%s, axis=%s]".formatted(pos(), axis);
+            }
+
+            @Override
+            protected float providedTorque()
+            {
+                return RotationNetworkManager.WINDMILL_PROVIDED_TORQUE;
             }
         };
     }
@@ -194,46 +169,38 @@ public class WindmillBlockEntity extends TickableInventoryBlockEntity<ItemStackH
     public void saveAdditional(CompoundTag tag, HolderLookup.Provider provider)
     {
         super.saveAdditional(tag, provider);
-        node.rotation().saveToTag(tag);
-        tag.putBoolean("invalid", invalid);
         tag.putBoolean("obstructed", obstructed);
+        node.saveAdditional(tag);
     }
 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider)
     {
         super.loadAdditional(tag, provider);
-        node.rotation().loadFromTag(tag);
-        invalid = tag.getBoolean("invalid");
         obstructed = tag.getBoolean("obstructed");
+        node.loadAdditional(tag);
+    }
+
+    @Override
+    protected void loadAdditionalOnClient(CompoundTag tag, HolderLookup.Provider provider)
+    {
+        node.loadAdditionalOnClient(tag);
     }
 
     @Override
     protected void onLoadAdditional()
     {
-        performNetworkAction(NetworkAction.ADD_SOURCE);
+        performNetworkAction(Action.ADD);
     }
 
     @Override
     protected void onUnloadAdditional()
     {
-        performNetworkAction(NetworkAction.REMOVE);
+        performNetworkAction(Action.REMOVE);
     }
 
     @Override
-    public void markAsInvalidInNetwork()
-    {
-        invalid = true;
-    }
-
-    @Override
-    public boolean isInvalidInNetwork()
-    {
-        return invalid;
-    }
-
-    @Override
-    public Node getRotationNode()
+    public RotationNode getRotationNode()
     {
         return node;
     }
