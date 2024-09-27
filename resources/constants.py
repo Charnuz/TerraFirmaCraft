@@ -1218,6 +1218,7 @@ DEFAULT_LANG = {
     'tfc.tooltip.required_less_than': 'Required: < %s',
     'tfc.tooltip.required_greater_than': 'Required: > %s',
     'tfc.tooltip.author': '§a%s§7 by %s',
+    'tfc.tooltip.rpm': '%s RPM',
     # Tooltips
     'tfc.tooltip.forging': '§f - Can Work',
     'tfc.tooltip.welding': '§f - Can Weld',
@@ -2056,7 +2057,7 @@ DEFAULT_LANG = {
     'tfc.config.server.enableLightningStrippingLogs': 'Enable Lightning Stripping Logs',
     'tfc.config.server.oceanWindScale': 'Ocean Wind Scale',
     'tfc.config.server.inferredMetals': 'Inferred Metals',
-    
+
     'tfc.config.server.acaciaSaplingGrowthTicks': 'Acacia Sapling Growth Ticks',
     'tfc.config.server.alpacaAdulthoodDays': 'Adulthood Days',
     'tfc.config.server.alpacaChildCount': 'Child Count',

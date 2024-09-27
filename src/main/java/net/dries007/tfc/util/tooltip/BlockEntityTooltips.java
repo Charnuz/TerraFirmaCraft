@@ -124,6 +124,7 @@ import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.data.LampFuel;
 import net.dries007.tfc.util.rotation.Rotation;
 import net.dries007.tfc.util.tracker.WeatherHelpers;
+import net.dries007.tfc.util.network.RotationOwner;
 
 /**
  * Common tooltips that can be displayed for various block entities via external sources.
@@ -186,16 +187,18 @@ public final class BlockEntityTooltips
     };
 
     public static final BlockEntityTooltip ROTATING = (level, state, pos, entity, tooltip) -> {
-        if (entity instanceof RotatingBlockEntity rotating)
+        //TODO check that this is needed?
+        //TODO is this supposed to be RotationOwner? some other class?
+        if (entity instanceof RotationOwner owner)
         {
-            getRotationComponent(rotating).ifPresent(tooltip);
+            tooltip.accept(Tooltips.rpm(owner));
         }
     };
 
     public static final BlockEntityTooltip ROTATIONAL_SOURCE = (level, state, pos, entity, tooltip) -> {
-        if (entity instanceof RotatingBlockEntity rotating)
+        if (entity instanceof RotationOwner owner)
         {
-            getRotationComponent(rotating).ifPresent(tooltip);
+            tooltip.accept(Tooltips.rpm(owner));
         }
         if (entity instanceof WindmillBlockEntity windmill)
         {
