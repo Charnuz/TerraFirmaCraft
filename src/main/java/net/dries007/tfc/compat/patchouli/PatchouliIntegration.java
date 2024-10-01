@@ -346,7 +346,8 @@ public final class PatchouliIntegration
 
         sneakIntoMultiblock(multiblock).ifPresent(access -> {
             access.getBlockEntity(new BlockPos(0, 1, 0), TFCBlockEntities.QUERN.get()).ifPresent(quern -> {
-                quern.getRotationNode().setRotationFromOutsideWorld();
+                // todo: set the rotation as well
+                //quern.getRotationNode().setRotationFromOutsideWorld();
                 quern.setHandstoneFromOutsideWorld();
                 quern.setAxleAboveFromOutsideWorld(TFCBlocks.WOODS.get(Wood.OAK).get(Wood.BlockType.AXLE).get());
             });

@@ -31,6 +31,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
 import net.dries007.tfc.client.ClimateRenderCache;
+import net.dries007.tfc.client.ClientRotationNetworkHandler;
 import net.dries007.tfc.common.blockentities.AbstractFirepitBlockEntity;
 import net.dries007.tfc.common.blockentities.AnemometerBlockEntity;
 import net.dries007.tfc.common.blockentities.BarrelBlockEntity;
@@ -192,6 +193,12 @@ public final class BlockEntityTooltips
         if (entity instanceof RotationOwner owner)
         {
             tooltip.accept(Tooltips.rpm(owner));
+            if (owner.isConnectedToNetwork() && TFCConfig.CLIENT.enableDebug.get())
+            {
+                // Only display tooltips for nodes that are synced, which includes syncing their networkId
+                tooltip.accept(Component.literal("[Debug] " + owner.getRotationNode()));
+                tooltip.accept(Component.literal("[Debug] " + ClientRotationNetworkHandler.getNetworkDebugTooltip(owner.getRotationNode().networkId())));
+            }
         }
     };
 
@@ -199,6 +206,12 @@ public final class BlockEntityTooltips
         if (entity instanceof RotationOwner owner)
         {
             tooltip.accept(Tooltips.rpm(owner));
+            if (owner.isConnectedToNetwork() && TFCConfig.CLIENT.enableDebug.get())
+            {
+                // Only display tooltips for nodes that are synced, which includes syncing their networkId
+                tooltip.accept(Component.literal("[Debug] " + owner.getRotationNode()));
+                tooltip.accept(Component.literal("[Debug] " + ClientRotationNetworkHandler.getNetworkDebugTooltip(owner.getRotationNode().networkId())));
+            }
         }
         if (entity instanceof WindmillBlockEntity windmill)
         {

@@ -393,6 +393,7 @@ public class ClientForgeEventHandler
         {
             Calendars.CLIENT.resetToDefault();
             IndirectHashCollection.clearAllCaches();
+            ClientRotationNetworkHandler.clear();
         }
     }
 
