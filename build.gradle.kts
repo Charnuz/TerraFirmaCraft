@@ -233,6 +233,7 @@ tasks {
             showExceptions = true
             showStackTraces = true
         }
+        jvmArgs("-ea")// TODO needed?
     }
 
     jar {
@@ -245,4 +246,3 @@ tasks {
         dependsOn(generateModMetadata)
     }
 }
-
