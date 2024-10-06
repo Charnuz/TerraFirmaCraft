@@ -200,6 +200,12 @@ public class WaterWheelBlockEntity extends TickableBlockEntity implements Rotati
     }
 
     @Override
+    protected void loadAdditionalOnClient(CompoundTag tag, HolderLookup.Provider provider)
+    {
+        node.loadAdditionalOnClient(tag);
+    }
+
+    @Override
     protected void onLoadAdditional()
     {
         performNetworkAction(Action.ADD);
