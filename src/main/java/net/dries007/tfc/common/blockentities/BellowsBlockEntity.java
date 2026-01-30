@@ -157,6 +157,7 @@ public class BellowsBlockEntity extends TFCBlockEntity
 
     public ItemInteractionResult onRightClick()
     {
+        assert level != null;
         if (canInteractWithHandle())
         {
             if (pushAirIntoReceivers())
@@ -171,7 +172,7 @@ public class BellowsBlockEntity extends TFCBlockEntity
 
             // Return success in both cases because we want the player's arm to swing, because they 'tried'
             // This allows them to signal failure to move
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);;
+            return ItemInteractionResult.sidedSuccess(level.isClientSide);
         }
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }

@@ -30,8 +30,8 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
-import net.dries007.tfc.client.ClimateRenderCache;
 import net.dries007.tfc.client.ClientRotationNetworkHandler;
+import net.dries007.tfc.client.ClimateRenderCache;
 import net.dries007.tfc.common.blockentities.AbstractFirepitBlockEntity;
 import net.dries007.tfc.common.blockentities.AnemometerBlockEntity;
 import net.dries007.tfc.common.blockentities.BarrelBlockEntity;
@@ -60,7 +60,6 @@ import net.dries007.tfc.common.blockentities.ThermometerBlockEntity;
 import net.dries007.tfc.common.blockentities.TickCounterBlockEntity;
 import net.dries007.tfc.common.blockentities.TickingPlantBlockEntity;
 import net.dries007.tfc.common.blockentities.VaneBlockEntity;
-import net.dries007.tfc.common.blockentities.rotation.RotatingBlockEntity;
 import net.dries007.tfc.common.blockentities.rotation.WaterWheelBlockEntity;
 import net.dries007.tfc.common.blockentities.rotation.WindmillBlockEntity;
 import net.dries007.tfc.common.blocks.BloomBlock;
@@ -123,9 +122,8 @@ import net.dries007.tfc.config.TemperatureDisplayStyle;
 import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.calendar.Calendars;
 import net.dries007.tfc.util.data.LampFuel;
-import net.dries007.tfc.util.rotation.Rotation;
-import net.dries007.tfc.util.tracker.WeatherHelpers;
 import net.dries007.tfc.util.network.RotationOwner;
+import net.dries007.tfc.util.tracker.WeatherHelpers;
 
 /**
  * Common tooltips that can be displayed for various block entities via external sources.
@@ -192,7 +190,7 @@ public final class BlockEntityTooltips
         //TODO is this supposed to be RotationOwner? some other class?
         if (entity instanceof RotationOwner owner)
         {
-            tooltip.accept(Tooltips.rpm(owner));
+            getRotationComponent(owner).ifPresent(tooltip);
             if (TFCConfig.CLIENT.enableDebug.get())
             {
                 // Only display tooltips for nodes that are synced, which includes syncing their networkId
@@ -205,8 +203,8 @@ public final class BlockEntityTooltips
     public static final BlockEntityTooltip ROTATIONAL_SOURCE = (level, state, pos, entity, tooltip) -> {
         if (entity instanceof RotationOwner owner)
         {
-            tooltip.accept(Tooltips.rpm(owner));
-            if (owner.isConnectedToNetwork() && TFCConfig.CLIENT.enableDebug.get())
+            getRotationComponent(owner).ifPresent(tooltip);
+            if (owner.getRotationNode().isConnectedToNetwork() && TFCConfig.CLIENT.enableDebug.get())
             {
                 // Only display tooltips for nodes that are synced, which includes syncing their networkId
                 tooltip.accept(Component.literal("[Debug] " + owner.getRotationNode()));
@@ -633,34 +631,30 @@ public final class BlockEntityTooltips
         }
     };
 
-    public static Optional<Component> getRotationComponent(RotatingBlockEntity rotating)
+    public static Optional<Component> getRotationComponent(RotationOwner rotating)
     {
-        final Rotation rotation = rotating.getRotationNode().rotation();
-        if (rotation != null && rotation.speed() != 0)
+        float speed = Math.abs(ClientRotationNetworkHandler.getRotationSpeed(rotating));
+        switch (TFCConfig.CLIENT.rotationDisplayStyle.get())
         {
-            float speed = Math.abs(rotation.positiveSpeed());
-            switch (TFCConfig.CLIENT.rotationDisplayStyle.get())
+            case RADIANS_PER_SECOND ->
             {
-                case RADIANS_PER_SECOND ->
-                {
-                    speed *= 20f;
-                    return Optional.of(Component.translatable("tfc.tooltip.rotation.angular_velocity.radians_per_second", String.format("%.2f", speed)));
-                }
-                case DEGREES_PER_SECOND ->
-                {
-                    speed = (speed / Mth.TWO_PI) * 360f * 20f;
-                    return Optional.of(Component.translatable("tfc.tooltip.rotation.angular_velocity.degrees_per_second", String.format("%.2f", speed)));
-                }
-                case REVOLUTIONS_PER_SECOND ->
-                {
-                    speed /= Mth.TWO_PI * 20f;
-                    return Optional.of(Component.translatable("tfc.tooltip.rotation.angular_velocity.revolutions_per_second", String.format("%.4f", speed)));
-                }
-                case REVOLUTIONS_PER_MINUTE ->
-                {
-                    speed = ((speed / Mth.TWO_PI) * 20f) * 60f;
-                    return Optional.of(Component.translatable("tfc.tooltip.rotation.angular_velocity.revolutions_per_minute", String.format("%.1f", speed)));
-                }
+                speed *= 20f;
+                return Optional.of(Component.translatable("tfc.tooltip.rotation.angular_velocity.radians_per_second", String.format("%.2f", speed)));
+            }
+            case DEGREES_PER_SECOND ->
+            {
+                speed = (speed / Mth.TWO_PI) * 360f * 20f;
+                return Optional.of(Component.translatable("tfc.tooltip.rotation.angular_velocity.degrees_per_second", String.format("%.2f", speed)));
+            }
+            case REVOLUTIONS_PER_SECOND ->
+            {
+                speed /= Mth.TWO_PI * 20f;
+                return Optional.of(Component.translatable("tfc.tooltip.rotation.angular_velocity.revolutions_per_second", String.format("%.4f", speed)));
+            }
+            case REVOLUTIONS_PER_MINUTE ->
+            {
+                speed = ((speed / Mth.TWO_PI) * 20f) * 60f;
+                return Optional.of(Component.translatable("tfc.tooltip.rotation.angular_velocity.revolutions_per_minute", String.format("%.1f", speed)));
             }
         }
         return Optional.empty();

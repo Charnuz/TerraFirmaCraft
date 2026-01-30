@@ -170,12 +170,6 @@ public class WaterWheelBlockEntity extends TickableBlockEntity implements Rotati
             }
 
             @Override
-            public String toString()
-            {
-                return "WaterWheel[pos=%s, axis=%s]".formatted(pos(), axis);
-            }
-
-            @Override
             protected float providedTorque()
             {
                 return RotationNetworkManager.WINDMILL_PROVIDED_TORQUE;

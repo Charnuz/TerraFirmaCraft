@@ -39,7 +39,6 @@ import net.dries007.tfc.common.blocks.ExtendedProperties;
 import net.dries007.tfc.common.blocks.TFCBlockStateProperties;
 import net.dries007.tfc.common.blocks.devices.DeviceBlock;
 import net.dries007.tfc.common.items.TFCItems;
-import net.dries007.tfc.util.Helpers;
 import net.dries007.tfc.util.advancements.TFCAdvancements;
 import net.dries007.tfc.util.network.RotationOwner;
 
@@ -97,7 +96,7 @@ public class WindmillBlock extends DeviceBlock implements EntityBlockExtension, 
             {
                 if (!player.getAbilities().instabuild)
                 {
-                    ItemHandlerHelper.giveItemToPlayer(player, inv.extractItem(count - 1, 1, false));
+                    ItemHandlerHelper.giveItemToPlayer(player, inventory.extractItem(count - 1, 1, false));
                 }
                 else
                 {

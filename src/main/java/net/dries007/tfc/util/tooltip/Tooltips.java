@@ -9,7 +9,6 @@ package net.dries007.tfc.util.tooltip;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Contract;
@@ -103,6 +102,8 @@ public final class Tooltips
         return Component.translatable("tfc.tooltip.author", source, author);
     }
 
+    //TODO remove
+    @Deprecated
     public static MutableComponent rpm(RotationOwner owner)
     {
         return Component.translatable("tfc.tooltip.rpm", String.format("%.1f", NetworkHelpers.SPEED_TO_RPM * ClientRotationNetworkHandler.getRotationSpeed(owner)));

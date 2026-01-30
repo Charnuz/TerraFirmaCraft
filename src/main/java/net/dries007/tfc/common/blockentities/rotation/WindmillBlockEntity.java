@@ -108,12 +108,6 @@ public class WindmillBlockEntity extends TickableInventoryBlockEntity<ItemStackH
             }
 
             @Override
-            public String toString()
-            {
-                return "Windmill[pos=%s, axis=%s]".formatted(pos(), axis);
-            }
-
-            @Override
             protected float providedTorque()
             {
                 return RotationNetworkManager.WINDMILL_PROVIDED_TORQUE;
@@ -203,5 +197,10 @@ public class WindmillBlockEntity extends TickableInventoryBlockEntity<ItemStackH
     public RotationNode getRotationNode()
     {
         return node;
+    }
+
+    public boolean isObstructed()
+    {
+        return obstructed;
     }
 }
