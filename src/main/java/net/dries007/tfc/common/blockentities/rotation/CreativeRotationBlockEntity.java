@@ -6,7 +6,6 @@
 
 package net.dries007.tfc.common.blockentities.rotation;
 
-import java.util.EnumSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -19,13 +18,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.dries007.tfc.common.blockentities.TFCBlockEntities;
 import net.dries007.tfc.common.blockentities.TickableBlockEntity;
 import net.dries007.tfc.common.blocks.rotation.CreativeRotationBlock;
-import net.dries007.tfc.util.rotation.NetworkAction;
-import net.dries007.tfc.util.rotation.Node;
-import net.dries007.tfc.util.rotation.Rotation;
-import net.dries007.tfc.util.rotation.SourceNode;
+import net.dries007.tfc.util.network.Action;
+import net.dries007.tfc.util.network.RotationNode;
+import net.dries007.tfc.util.network.RotationOwner;
 
-public class CreativeRotationBlockEntity extends TickableBlockEntity implements RotatingBlockEntity
+public class CreativeRotationBlockEntity extends TickableBlockEntity implements RotationOwner
 {
+    public static final float TORQUE = 30f;
     // 30 RPM
     public static final float MAX_SPEED = Mth.TWO_PI / (2 * 20);
     public static final int MAX_STEPS = 8;
@@ -34,24 +33,18 @@ public class CreativeRotationBlockEntity extends TickableBlockEntity implements 
     public static void serverTick(Level level, BlockPos pos, BlockState state, CreativeRotationBlockEntity motor)
     {
         motor.checkForLastTickSync();
-
-        clientTick(level, pos, state, motor);
-    }
-
-    public static void clientTick(Level level, BlockPos pos, BlockState state, CreativeRotationBlockEntity motor)
-    {
-        final Rotation.Tickable rotation = motor.node.rotation();
-        rotation.tick();
         float target = motor.step * LERP_SPEED;
-        if (rotation.speed() != target)
+        if (motor.targetSpeed != target)
         {
-            rotation.setSpeed(target);
+            motor.targetSpeed = target;
+            motor.performNetworkAction(Action.UPDATE_IN_NETWORK);
+            motor.markForSync();
         }
     }
 
-    private final CreativeSourceNode node;
+    private final RotationNode node;
     private int step;
-    private boolean invalid;
+    private float targetSpeed = 0f;
 
     //TODO add a function to change rotation axis
     public CreativeRotationBlockEntity(BlockPos pos, BlockState state)
@@ -63,23 +56,24 @@ public class CreativeRotationBlockEntity extends TickableBlockEntity implements 
     {
         super(type, pos, state);
         Direction.Axis axis = state.getValue(CreativeRotationBlock.AXIS);
-        this.node = new CreativeSourceNode(pos, Node.ofAxis(axis), Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE), 0f);
+        this.node = new RotationNode.Axle(this, axis, TORQUE)
+        {
+            @Override
+            protected float providedSpeed()
+            {
+                return CreativeRotationBlockEntity.this.targetSpeed;
+            }
+
+            @Override
+            protected float providedTorque()
+            {
+                return TORQUE;
+            }
+        };
     }
 
     @Override
-    public void markAsInvalidInNetwork()
-    {
-        invalid = true;
-    }
-
-    @Override
-    public boolean isInvalidInNetwork()
-    {
-        return invalid;
-    }
-
-    @Override
-    public Node getRotationNode()
+    public RotationNode getRotationNode()
     {
         return node;
     }
@@ -88,30 +82,28 @@ public class CreativeRotationBlockEntity extends TickableBlockEntity implements 
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider)
     {
         super.saveAdditional(tag, provider);
-        node.rotation().saveToTag(tag);
+        node.saveAdditional(tag);
         tag.putInt("step", step);
-        tag.putBoolean("invalid", invalid);
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider)
     {
         super.loadAdditional(tag, provider);
-        node.rotation().loadFromTag(tag);
+        node.loadAdditional(tag);
         step = tag.getInt("step");
-        invalid = tag.getBoolean("invalid");
     }
 
     @Override
     protected void onLoadAdditional()
     {
-        performNetworkAction(NetworkAction.ADD_SOURCE);
+        performNetworkAction(Action.ADD);
     }
 
     @Override
     protected void onUnloadAdditional()
     {
-        performNetworkAction(NetworkAction.REMOVE);
+        performNetworkAction(Action.REMOVE);
     }
 
     public void incrementSpeed()
@@ -124,23 +116,4 @@ public class CreativeRotationBlockEntity extends TickableBlockEntity implements 
         step = Mth.clamp(step - 1, -MAX_STEPS, MAX_STEPS);
     }
 
-    private static class CreativeSourceNode extends SourceNode
-    {
-        protected CreativeSourceNode(BlockPos pos, EnumSet<Direction> connections, Direction rotationDirection, float speed)
-        {
-            super(pos, connections, rotationDirection, speed);
-        }
-
-        public void setDirection(Direction.Axis axis, Direction.AxisDirection direction)
-        {
-            this.rotation = Rotation.of(Direction.fromAxisAndDirection(axis, direction), 0);
-        }
-
-        @Override
-        public String toString()
-        {
-            // Using connections() over including a field to track the axis
-            return "CreativeRotator[pos=%s, connections=%s]".formatted(pos(), connections());
-        }
-    }
 }

@@ -507,7 +507,7 @@ public final class TFCBlocks
         register("ceramic/large_vessel/" + color.getName(), () -> new LargeVesselBlock(ExtendedProperties.of(MapColor.CLAY).strength(2.5F).noOcclusion().blockEntity(TFCBlockEntities.LARGE_VESSEL)), block -> new TooltipBlockItem(block, new Item.Properties()))
     );
 
-    public static final Id<Block> CREATIVE_MOTOR = register("creative_motor", () -> new CreativeRotationBlock(ExtendedProperties.of(Blocks.IRON_BLOCK).blockEntity(TFCBlockEntities.CREATIVE_MOTOR).ticks(CreativeRotationBlockEntity::serverTick, CreativeRotationBlockEntity::clientTick)));
+    public static final Id<Block> CREATIVE_MOTOR = register("creative_motor", () -> new CreativeRotationBlock(ExtendedProperties.of(Blocks.IRON_BLOCK).blockEntity(TFCBlockEntities.CREATIVE_MOTOR).serverTicks(CreativeRotationBlockEntity::serverTick)));
 
     // Fluids
 
